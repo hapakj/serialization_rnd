@@ -3,11 +3,13 @@
 #include <iostream>
 #include <fstream>
 
+#ifdef USE_CEREAL
 #include <cereal\cereal.hpp>
 #include <cereal\archives\json.hpp>
-//#include <cereal\types\unordered_set.hpp>
+#endif
 
 
+#ifdef USE_CEREAL
 //
 //	Test Cereal 1 color
 //
@@ -20,7 +22,7 @@ void serialize(Archive &ar, Color &c)
 		cereal::make_nvp("b", c.b));
 }
 
-void test1()
+void test1_cereal()
 {
 	std::ofstream os("test1.json");
 	cereal::JSONOutputArchive ar(os);
@@ -49,7 +51,7 @@ std::unique_ptr<World> CreateTestWorld()
 
 
 
-void test2()
+void test2_cereal()
 {
 	std::ofstream os("test2.json");
 	cereal::JSONOutputArchive ar(os);
@@ -58,11 +60,14 @@ void test2()
 
 	ar(cereal::make_nvp("world", *world));
 }
+#endif
 
 
 int main(int /*argc*/, char** /*argv*/)
 {
-	test1();
-	test2();
+#ifdef USE_CEREAL
+	test1_cereal();
+	test2_cereal();
+#endif
 }
 

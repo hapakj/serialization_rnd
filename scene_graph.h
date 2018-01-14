@@ -7,8 +7,10 @@
 
 #include<glm/glm.hpp>
 
+#ifdef USE_CEREAL
 #include<cereal/types/memory.hpp>
 #include<cereal/types/unordered_set.hpp>
+#endif
 
 
 struct Color
@@ -30,7 +32,6 @@ struct Color
 class Object
 {
 public:
-	Object() = default;
 	Object(std::string name)
 		: m_name(name)
 	{
@@ -39,14 +40,7 @@ public:
 	std::string m_name;
 	uint64_t m_guid;
 
-#if 0
-	template<class Archive>
-	void serialize(Archive &ar)
-	{
-		ar(cereal::make_nvp("name", m_name));
-	}
-#endif
-
+#ifdef USE_CEREAL
 	template<class Archive>
 	void load(Archive &ar)
 	{
@@ -58,13 +52,13 @@ public:
 	{
 		ar(cereal::make_nvp("name", m_name));
 	}
+#endif
 };
 
 
 class Node : public Object
 {
 public:
-	Node() = default;
 	Node(std::string name)
 		: Object(name)
 	{
@@ -99,14 +93,7 @@ public:
 	{
 	}
 
-#if 0 
-	template<class Archive>
-	void serialize(Archive &ar)
-	{
-		ar(cereal::base_class<Object>(this));
-	}
-#endif
-
+#ifdef USE_CEREAL
 	template<class Archive>
 	void load(Archive &ar)
 	{
@@ -118,6 +105,7 @@ public:
 	{
 		ar(cereal::base_class<Object>(this));
 	}
+#endif
 };
 
 
@@ -132,6 +120,7 @@ public:
 
 	std::unordered_set<std::shared_ptr<Actor>> m_actors;
 
+#ifdef USE_CEREAL
 	template<class Archive>
 	void save(Archive &ar) const
 	{
@@ -147,5 +136,6 @@ public:
 	void load(Archive &ar)
 	{
 	}
+#endif
 };
 
