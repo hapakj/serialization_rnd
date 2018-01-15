@@ -4,13 +4,12 @@
 #include <string>
 #include <unordered_set>
 #include <memory>
+#include <functional>
 
 #include<glm/glm.hpp>
 
-#ifdef USE_CEREAL
-#include<cereal/types/memory.hpp>
-#include<cereal/types/unordered_set.hpp>
-#endif
+#include"json_object.h"
+
 
 
 struct Color
@@ -40,19 +39,6 @@ public:
 	std::string m_name;
 	uint64_t m_guid;
 
-#ifdef USE_CEREAL
-	template<class Archive>
-	void load(Archive &ar)
-	{
-		ar(cereal::make_nvp("name", m_name));
-	}
-
-	template<class Archive>
-	void save(Archive &ar) const
-	{
-		ar(cereal::make_nvp("name", m_name));
-	}
-#endif
 };
 
 
@@ -68,6 +54,14 @@ public:
 	std::unordered_set<std::shared_ptr<Node>> m_children;
 
 	glm::mat4x4 m_local_transform;
+
+#if 1
+	void Serialize(JsonSerializer &json)
+	{
+		//json.values["name"] = m_name;
+		//json.values["children"] = m_children;
+	}
+#endif
 };
 
 
@@ -92,20 +86,6 @@ public:
 		: Node(name)
 	{
 	}
-
-#ifdef USE_CEREAL
-	template<class Archive>
-	void load(Archive &ar)
-	{
-		ar(cereal::base_class<Object>(this));
-	}
-
-	template<class Archive>
-	void save(Archive &ar) const
-	{
-		ar(cereal::base_class<Object>(this));
-	}
-#endif
 };
 
 
@@ -120,22 +100,23 @@ public:
 
 	std::unordered_set<std::shared_ptr<Actor>> m_actors;
 
-#ifdef USE_CEREAL
-	template<class Archive>
-	void save(Archive &ar) const
-	{
-		ar(cereal::make_nvp("object", cereal::base_class<Object>(this)));
 
-		for (auto actor : m_actors)
+	template<typename T>
+	void Serialize(T Serializer)
+	{
+		std::function<std::shared_ptr<Actor>(JsonDeserializer)> OnActorLoad = [](JsonDeserializer Deserializer) -> std::shared_ptr<Actor>
 		{
-			ar(*actor);
-		}
-	}
+			std::string name;
+			Deserializer("name", name);
 
-	template<class Archive>
-	void load(Archive &ar)
-	{
+			std::shared_ptr<Actor> actor = std::make_shared<Actor>(name);
+			//actor->Serialize(Deserializer);
+
+			return actor;
+		};
+
+		Serializer("name", m_name);
+		Serializer("actors", m_actors, std::function<JsonObject(std::shared_ptr<Actor>)>(), OnActorLoad);
 	}
-#endif
 };
 

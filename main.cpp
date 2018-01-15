@@ -9,6 +9,9 @@
 #endif
 
 
+#include "json_object.h"
+
+
 #ifdef USE_CEREAL
 //
 //	Test Cereal 1 color
@@ -63,11 +66,32 @@ void test2_cereal()
 #endif
 
 
+
+template<typename T>
+void Serialize(T Serializer, Color c)
+{
+	Serializer("r", c.r);
+	Serializer("b", c.b);
+	Serializer("b", c.b);
+}
+
+
 int main(int /*argc*/, char** /*argv*/)
 {
 #ifdef USE_CEREAL
 	test1_cereal();
 	test2_cereal();
 #endif
+
+	Color c1(1.0f,2.0f,3.0f);
+	JsonObject jo = c1;
+
+
+	World w("helloka");
+
+	JsonObject jw = w;
+
+
+	return 0;
 }
 
